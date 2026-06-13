@@ -1,0 +1,11 @@
+services:
+  db:
+    container_name: "library-psql"
+    ports:
+      - "5432:5432"
+    image: postgres
+    restart: on-failure:10
+    environment:
+      POSTGRES_PASSWORD: "admin"
+      POSTGRES_USER: "admin"
+      POSTGRES_DB: "library"
