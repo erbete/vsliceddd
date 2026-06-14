@@ -9,8 +9,6 @@ public sealed class Book : Entity
 	public const int MaxAuthorLength = 255;
 	public const int MaxIsbnLength = 17;
 
-	private Book() { }
-
 	public string Title { get; private set; } = null!;
 	public string Author { get; private set; } = null!;
 	public string? Isbn { get; private set; }
@@ -18,24 +16,22 @@ public sealed class Book : Entity
 
 	public Guid ShelfId { get; private set; }
 
-	internal static Book Create(Guid id, string title, string author, string? isbn = null)
+	private Book() { }
+
+	internal static Book Create(Guid id, Guid shelfId, string title, string author, string? isbn = null)
 	{
 		GuardTitle(title);
 		GuardAuthor(author);
 		GuardIsbn(isbn);
-
-		var book = new Book
+		return new Book
 		{
-			Id = id, 
+			Id = id,
+			ShelfId = shelfId,
 			Title = title.Trim(),
 			Author = author.Trim(),
 			Isbn = isbn?.Trim()
 		};
-
-		return book;
 	}
-
-	internal void AttachToShelf(Guid shelfId) => ShelfId = shelfId;
 
 	internal void FinishReading(DateOnly startedOn, DateOnly finishedOn)
 	{
@@ -72,7 +68,7 @@ public sealed class Book : Entity
 			throw new ArgumentException($"Author exceeds maximum length of {MaxAuthorLength} characters.");
 		}
 	}
-	
+
 	private static void GuardIsbn(string? isbn)
 	{
 		if (isbn is not null && isbn.Trim().Length > MaxIsbnLength)

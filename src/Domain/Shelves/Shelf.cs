@@ -40,8 +40,7 @@ public sealed class Shelf : AggregateRoot
 			return Result.Fail(ResultError.Conflict($"Shelf is full (max {MaxBooks} books)."));
 		}
 
-		var book = Book.Create(bookId, title, author, isbn);
-		book.AttachToShelf(Id);
+		var book = Book.Create(bookId, Id, title, author, isbn);
 		_books.Add(book);
 		Raise(new BookAddedToShelf(Id, book.Id));
 		return Result<Guid>.Success(book.Id);
