@@ -9,3 +9,6 @@ dotnet ef database update --project src/Database --startup-project src/WebAPI
 
 ## Run
 dotnet run --project src/WebAPI
+
+## OpenAPI
+http://localhost:5243/scalar

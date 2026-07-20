@@ -15,6 +15,8 @@ public static class DatabaseSetup
 	public static WebApplicationBuilder AddDatabase(this WebApplicationBuilder builder)
 	{
 		builder.Services.AddDatabase(builder.Configuration);
+		builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>("database");
+
 		return builder;
 	}
 

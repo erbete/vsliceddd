@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using WebAPI.Infrastructure.Setup;
-using WebAPI.Features;
 using System;
 
 LoggingSetup.InitializeBootstrap();
