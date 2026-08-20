@@ -1,10 +1,11 @@
-using Domain.Shelves;
+using Domain.Authors;
+using Domain.Books;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Database.Configurations;
 
-internal sealed class BookConfiguration : BaseConfiguration<Book>
+internal sealed class BookConfiguration : AggregateRootConfiguration<Book>
 {
 	protected override void ConfigureEntity(EntityTypeBuilder<Book> builder)
 	{
@@ -12,31 +13,33 @@ internal sealed class BookConfiguration : BaseConfiguration<Book>
 
 		builder.Property(p => p.Title)
 			.HasColumnName("title")
-			.HasMaxLength(Book.MaxTitleLength)
-			.IsRequired();
-
-		builder.Property(p => p.Author)
-			.HasColumnName("author")
-			.HasMaxLength(Book.MaxAuthorLength)
-			.IsRequired();
+			.HasMaxLength(Book.MaxTitleLength);
 
 		builder.Property(b => b.Isbn)
-			.HasMaxLength(Book.MaxIsbnLength)
-			.HasColumnName("isbn");
+			.HasColumnName("isbn")
+			.HasMaxLength(Book.MaxIsbnLength);
 
-		builder.Property(b => b.ShelfId)
-			.HasColumnName("shelf_id");
+		builder.Property(b => b.PublishedYear)
+			.HasColumnName("published_year");
 
-		builder.OwnsOne(b => b.ReadingPeriod, rp =>
-		{
-			rp.Property(r => r.Start).HasColumnName("reading_start");
-			rp.Property(r => r.End).HasColumnName("reading_end");
-		});
-
-		builder.HasIndex(b => b.ShelfId)
-			.HasDatabaseName("ix_books_shelf_id");
+		builder.Property(b => b.AuthorId)
+			.HasColumnName("author_id");
 
 		builder.HasIndex(b => b.Isbn)
-			.HasDatabaseName("ix_books_isbn");
+			.HasDatabaseName("ix_books_isbn")
+			.IsUnique();
+
+		builder.HasMany(b => b.BookItems)
+			.WithOne(bi => bi.Book)
+			.HasForeignKey(bi => bi.BookId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		builder.Navigation(b => b.BookItems)
+			.UsePropertyAccessMode(PropertyAccessMode.Field);
+
+		builder.HasOne<Author>()
+			.WithMany()
+			.HasForeignKey(b => b.AuthorId)
+			.OnDelete(DeleteBehavior.Restrict);
 	}
 }
