@@ -17,8 +17,8 @@ public sealed class DomainEventDispatchInterceptor(TimeProvider timeProvider) : 
     }
 
     public override async ValueTask<int> SavedChangesAsync(
-        SaveChangesCompletedEventData eventData, 
-        int result, 
+        SaveChangesCompletedEventData eventData,
+        int result,
         CancellationToken cancellationToken = default)
     {
         await DispatchAsync(eventData.Context);
@@ -40,7 +40,9 @@ public sealed class DomainEventDispatchInterceptor(TimeProvider timeProvider) : 
         var events = aggregates.SelectMany(a => a.DomainEvents).ToList();
 
         foreach (var aggregate in aggregates)
+        {
             aggregate.ClearDomainEvents();
+        }
 
         var now = timeProvider.GetUtcNow();
         foreach (var domainEvent in events)

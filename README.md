@@ -1,6 +1,6 @@
 # VSliceDDD
 
-A deliberately over-engineered vertical-slice + (selective) DDD playground. The domain (shelves and books) is trivial on purpose and the architecture is the experiment, not the features.
+A deliberately over-engineered vertical-slice + (selective) DDD playground. The domain is trivial on purpose and the architecture is the experiment, not the features.
 
 ## Setup
 docker compose up -d

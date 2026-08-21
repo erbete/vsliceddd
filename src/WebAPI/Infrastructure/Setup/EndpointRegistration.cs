@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Builder;
-using WebAPI.Features.Shelves;
+using WebAPI.Features.Books;
 
 namespace WebAPI.Infrastructure.Setup;
 
@@ -10,7 +10,7 @@ public static class EndpointRegistration
 		app.UseHealthChecks("/_health");
 
 		var group = app.MapGroup("/api");
-		group.MapShelvesEndpoints();
+		group.MapBooksEndpoints();
 		return app;
 	}
 }

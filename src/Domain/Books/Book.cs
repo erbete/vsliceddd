@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Domain.Common;
+using ErrorOr;
 
 namespace Domain.Books;
 
@@ -16,8 +18,8 @@ public sealed class Book : AggregateRoot
 
 	public Guid AuthorId { get; private set; }
 
-	public IReadOnlyList<BookItem> BookItems => _items;
-	private readonly List<BookItem> _items = [];
+	public IReadOnlyList<BookItem> BookItems => _bookItems;
+	private readonly List<BookItem> _bookItems = [];
 
 	private Book(Guid id, string title, int publishedYear, Guid authorId, string? isbn = null)
 	{
@@ -33,14 +35,13 @@ public sealed class Book : AggregateRoot
 		AuthorId = authorId;
 	}
 
-	internal static Book Create(
+	public static Book Create(
 		Guid id,
 		string title,
 		int publishedYear,
 		Guid authorId,
 		string? isbn = null) => new(id, title, publishedYear, authorId, isbn);
 
-	// TODO add result pattern?
 	public void UpdateDetails(string title, int publishedYear, string? isbn = null)
 	{
 		GuardTitle(title);
@@ -52,11 +53,36 @@ public sealed class Book : AggregateRoot
 		Isbn = isbn?.Trim();
 	}
 
-	// TODO: add result pattern
-	public void AddCopy(Guid id, string barcode, DateOnly acquired)
+	public ErrorOr<Success> UpdateBarcode(Guid bookItemId, string barcode)
 	{
+		var item = _bookItems.FirstOrDefault(i => i.Id == bookItemId);
+		if (item is null)
+		{
+			return BookErrors.BookItemNotFound(bookItemId);
+		}
+
+		var trimmed = barcode.Trim();
+		if (_bookItems.Any(i => i.Id != bookItemId && i.Barcode.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+		{
+			return BookErrors.DuplicateBarcode(barcode);
+		}
+
+		item.UpdateBarcode(barcode);
+		return Result.Success;
+	}
+
+	public ErrorOr<Guid> AddCopy(Guid id, string barcode, DateOnly acquired)
+	{
+		var trimmed = barcode.Trim();
+		if (_bookItems.Any(i => i.Barcode.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+		{
+			return BookErrors.DuplicateBarcode(barcode);
+		}
+
 		var item = BookItem.Create(id, barcode, acquired, this);
-		_items.Add(item);
+		_bookItems.Add(item);
+
+		return item.Id;
 	}
 
 	private static void GuardTitle(string title)

@@ -13,6 +13,7 @@ try
         .AddDomainServices()
         .AddExceptionHandling()
         .AddOpenApiDocs()
+        .AddTelemetry()
         .AddFeatures();
 
     var app = builder.Build();

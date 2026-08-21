@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Domain.Common;
 
 namespace Domain.Books;
@@ -21,7 +22,7 @@ public sealed class BookItem : Entity
         GuardBookId(bookId);
 
         Id = id;
-        Barcode = barcode.Trim();
+        Barcode = barcode.Trim().ToLower(CultureInfo.InvariantCulture);
         Acquired = acquired;
         BookId = bookId;
     }
@@ -32,13 +33,10 @@ public sealed class BookItem : Entity
         DateOnly acquired,
         Book book) => new(id, barcode, acquired, book.Id);
 
-    internal void UpdateDetails(string barcode, DateOnly acquired)
+    internal void UpdateBarcode(string barcode)
     {
         GuardBarcode(barcode);
-        GuardAcquired(acquired);
-
-        Barcode = barcode.Trim();
-        Acquired = acquired;
+        Barcode = barcode.Trim().ToLower(CultureInfo.InvariantCulture);
     }
 
     private static void GuardId(Guid id)
@@ -53,7 +51,7 @@ public sealed class BookItem : Entity
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(barcode);
 
-        if (barcode.Length > MaxBarcodeLength)
+        if (barcode.Trim().Length > MaxBarcodeLength)
         {
             throw new ArgumentException($"Barcode exceeds maximum length of {MaxBarcodeLength} characters.");
         }
