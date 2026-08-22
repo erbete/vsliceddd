@@ -14,34 +14,34 @@ namespace WebAPI.Features.Books;
 
 internal static class GetBookById
 {
-    internal sealed record Query(Guid Id);
-    internal sealed record BookResponse(Guid Id, string Title, int PublishedYear, string? Isbn);
+    internal sealed record Request(Guid Id);
+    internal sealed record Response(Guid Id, string Title, int PublishedYear, string? Isbn);
 
     internal sealed class Handler(AppDbContext db)
     {
-        public async Task<ErrorOr<BookResponse>> HandleAsync(Query query, CancellationToken ct)
+        public async Task<ErrorOr<Response>> HandleAsync(Request Request, CancellationToken ct)
         {
             var book = await db.Books
                 .AsNoTracking()
-                .Where(b => b.Id == query.Id)
-                .Select(b => new BookResponse(b.Id, b.Title, b.PublishedYear, b.Isbn))
+                .Where(b => b.Id == Request.Id)
+                .Select(b => new Response(b.Id, b.Title, b.PublishedYear, b.Isbn))
                 .FirstOrDefaultAsync(ct);
 
             if (book is null)
             {
-                return BookErrors.NotFound(query.Id);
+                return BookErrors.NotFound(Request.Id);
             }
 
             return book;
         }
     }
 
-    internal static async Task<Results<Ok<BookResponse>, ProblemHttpResult>> Endpoint(
+    internal static async Task<Results<Ok<Response>, ProblemHttpResult>> Endpoint(
         Guid id,
         Handler handler,
         CancellationToken ct)
     {
-        var result = await handler.HandleAsync(new Query(id), ct);
+        var result = await handler.HandleAsync(new Request(id), ct);
 
         return result.IsError
             ? Problems.From(result.FirstError)

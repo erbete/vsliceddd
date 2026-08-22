@@ -26,7 +26,7 @@ internal static class Endpoints
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPost("/", CreateBook.Endpoint)
-            .AddEndpointFilter<ValidationFilter<CreateBook.BookRequest>>()
+            .AddEndpointFilter<ValidationFilter<CreateBook.Request>>()
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict);

@@ -16,11 +16,10 @@ namespace WebAPI.Features.Books;
 
 internal static class CreateBook
 {
-    internal sealed record Command(string Title, int PublishedYear, Guid AuthorId, string? Isbn);
-    internal sealed record BookRequest(string Title, int PublishedYear, Guid AuthorId, string? Isbn);
-    internal sealed record BookResponse(Guid Id, string Title, int PublishedYear, string? Isbn);
+    internal sealed record Request(string Title, int PublishedYear, Guid AuthorId, string? Isbn);
+    internal sealed record Response(Guid Id, string Title, int PublishedYear, string? Isbn);
 
-    internal sealed class CreateBookValidator : AbstractValidator<BookRequest>
+    internal sealed class CreateBookValidator : AbstractValidator<Request>
     {
         public CreateBookValidator()
         {
@@ -42,15 +41,15 @@ internal static class CreateBook
 
     internal sealed class Handler(AppDbContext db, IIdGenerator idGenerator)
     {
-        public async Task<ErrorOr<BookResponse>> HandleAsync(Command cmd, CancellationToken ct)
+        public async Task<ErrorOr<Response>> HandleAsync(Request request, CancellationToken ct)
         {
-            bool authorExists = await db.Authors.AnyAsync(a => a.Id == cmd.AuthorId, ct);
+            bool authorExists = await db.Authors.AnyAsync(a => a.Id == request.AuthorId, ct);
             if (!authorExists)
             {
-                return BookErrors.AuthorNotFound(cmd.AuthorId);
+                return BookErrors.AuthorNotFound(request.AuthorId);
             }
 
-            var book = Book.Create(idGenerator.NewId(), cmd.Title, cmd.PublishedYear, cmd.AuthorId, cmd.Isbn);
+            var book = Book.Create(idGenerator.NewId(), request.Title, request.PublishedYear, request.AuthorId, request.Isbn);
             db.Books.Add(book);
 
             try
@@ -59,20 +58,19 @@ internal static class CreateBook
             }
             catch (UniqueConstraintException)
             {
-                return BookErrors.DuplicateIsbn(cmd.Title, cmd.Isbn);
+                return BookErrors.DuplicateIsbn(request.Title, request.Isbn);
             }
 
-            return new BookResponse(book.Id, book.Title, book.PublishedYear, book.Isbn);
+            return new Response(book.Id, book.Title, book.PublishedYear, book.Isbn);
         }
     }
 
-    internal static async Task<Results<CreatedAtRoute<BookResponse>, ProblemHttpResult>> Endpoint(
-        BookRequest request,
+    internal static async Task<Results<CreatedAtRoute<Response>, ProblemHttpResult>> Endpoint(
+        Request request,
         Handler handler,
         CancellationToken ct)
     {
-        var cmd = new Command(request.Title, request.PublishedYear, request.AuthorId, request.Isbn);
-        var result = await handler.HandleAsync(cmd, ct);
+        var result = await handler.HandleAsync(request, ct);
 
         return result.IsError
             ? Problems.From(result.FirstError)
