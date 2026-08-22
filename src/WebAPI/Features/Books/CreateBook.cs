@@ -44,7 +44,7 @@ internal static class CreateBook
     {
         public async Task<ErrorOr<BookResponse>> HandleAsync(Command cmd, CancellationToken ct)
         {
-            var authorExists = await db.Authors.AnyAsync(a => a.Id == cmd.AuthorId, ct);
+            bool authorExists = await db.Authors.AnyAsync(a => a.Id == cmd.AuthorId, ct);
             if (!authorExists)
             {
                 return BookErrors.AuthorNotFound(cmd.AuthorId);

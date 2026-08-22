@@ -10,19 +10,20 @@ public sealed class BookItem : Entity
 
     public string Barcode { get; private set; }
     public DateOnly Acquired { get; private set; }
-
     public Guid BookId { get; private set; }
     public Book Book { get; private set; } = null!;
 
     private BookItem(Guid id, string barcode, DateOnly acquired, Guid bookId)
     {
+        barcode = Normalize(barcode);
+
         GuardId(id);
         GuardBarcode(barcode);
         GuardAcquired(acquired);
         GuardBookId(bookId);
 
         Id = id;
-        Barcode = barcode.Trim().ToLower(CultureInfo.InvariantCulture);
+        Barcode = barcode;
         Acquired = acquired;
         BookId = bookId;
     }
@@ -35,9 +36,13 @@ public sealed class BookItem : Entity
 
     internal void UpdateBarcode(string barcode)
     {
+        barcode = Normalize(barcode);
         GuardBarcode(barcode);
-        Barcode = barcode.Trim().ToLower(CultureInfo.InvariantCulture);
+        Barcode = barcode;
     }
+
+    internal static string Normalize(string barcode)
+        => barcode?.Trim().ToLower(CultureInfo.InvariantCulture)!;
 
     private static void GuardId(Guid id)
     {
@@ -50,15 +55,14 @@ public sealed class BookItem : Entity
     private static void GuardBarcode(string barcode)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(barcode);
-
-        if (barcode.Trim().Length > MaxBarcodeLength)
+        if (barcode.Length > MaxBarcodeLength)
         {
-            throw new ArgumentException($"Barcode exceeds maximum length of {MaxBarcodeLength} characters.");
+            throw new ArgumentException($"Barcode exceeds maximum length of {MaxBarcodeLength} characters.", nameof(barcode));
         }
     }
 
-    private static void GuardAcquired(DateOnly acquired) =>
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(acquired, DateOnly.FromDateTime(DateTime.UtcNow));
+    private static void GuardAcquired(DateOnly acquired)
+        => ArgumentOutOfRangeException.ThrowIfGreaterThan(acquired, DateOnly.FromDateTime(DateTime.UtcNow));
 
     private static void GuardBookId(Guid bookId)
     {

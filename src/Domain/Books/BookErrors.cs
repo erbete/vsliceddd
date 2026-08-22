@@ -19,4 +19,7 @@ public static class BookErrors
 
     public static Error NotFound(Guid id)
         => Error.NotFound("Book.NotFound", $"Book with ID {id} not found.");
+
+    public static Error DuplicateBookItemId(Guid id)
+        => Error.Conflict("Book.DuplicateBookItemId", $"A copy with id '{id}' already exists for this book.");
 }

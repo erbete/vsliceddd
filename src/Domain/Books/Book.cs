@@ -15,7 +15,6 @@ public sealed class Book : AggregateRoot
 	public string Title { get; private set; }
 	public int PublishedYear { get; private set; }
 	public string? Isbn { get; private set; }
-
 	public Guid AuthorId { get; private set; }
 
 	public IReadOnlyList<BookItem> BookItems => _bookItems;
@@ -23,15 +22,19 @@ public sealed class Book : AggregateRoot
 
 	private Book(Guid id, string title, int publishedYear, Guid authorId, string? isbn = null)
 	{
+		title = title?.Trim()!;
+		isbn = isbn?.Trim();
+
+		GuardId(id);
 		GuardTitle(title);
 		GuardPublishedYear(publishedYear);
 		GuardIsbn(isbn);
 		GuardAuthorId(authorId);
 
 		Id = id;
-		Title = title.Trim();
+		Title = title;
 		PublishedYear = publishedYear;
-		Isbn = isbn?.Trim();
+		Isbn = isbn;
 		AuthorId = authorId;
 	}
 
@@ -44,13 +47,36 @@ public sealed class Book : AggregateRoot
 
 	public void UpdateDetails(string title, int publishedYear, string? isbn = null)
 	{
+		title = title?.Trim()!;
+		isbn = isbn?.Trim();
+
 		GuardTitle(title);
 		GuardPublishedYear(publishedYear);
 		GuardIsbn(isbn);
 
-		Title = title.Trim();
+		Title = title;
 		PublishedYear = publishedYear;
-		Isbn = isbn?.Trim();
+		Isbn = isbn;
+	}
+
+	public ErrorOr<Guid> AddCopy(Guid id, string barcode, DateOnly acquired)
+	{
+		GuardId(id);
+
+		var item = BookItem.Create(id, barcode, acquired, this);
+
+		if (_bookItems.Any(i => i.Id == item.Id))
+		{
+			return BookErrors.DuplicateBookItemId(item.Id);
+		}
+
+		if (_bookItems.Any(i => i.Barcode.Equals(item.Barcode, StringComparison.Ordinal)))
+		{
+			return BookErrors.DuplicateBarcode(item.Barcode);
+		}
+
+		_bookItems.Add(item);
+		return item.Id;
 	}
 
 	public ErrorOr<Success> UpdateBarcode(Guid bookItemId, string barcode)
@@ -61,45 +87,39 @@ public sealed class Book : AggregateRoot
 			return BookErrors.BookItemNotFound(bookItemId);
 		}
 
-		var trimmed = barcode.Trim();
-		if (_bookItems.Any(i => i.Id != bookItemId && i.Barcode.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+		string normalized = BookItem.Normalize(barcode);
+
+		if (_bookItems.Any(i => i.Id != bookItemId && i.Barcode.Equals(normalized, StringComparison.Ordinal)))
 		{
-			return BookErrors.DuplicateBarcode(barcode);
+			return BookErrors.DuplicateBarcode(normalized);
 		}
 
 		item.UpdateBarcode(barcode);
 		return Result.Success;
 	}
 
-	public ErrorOr<Guid> AddCopy(Guid id, string barcode, DateOnly acquired)
+	private static void GuardId(Guid id)
 	{
-		var trimmed = barcode.Trim();
-		if (_bookItems.Any(i => i.Barcode.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+		if (id == Guid.Empty)
 		{
-			return BookErrors.DuplicateBarcode(barcode);
+			throw new ArgumentException("Id cannot be empty.", nameof(id));
 		}
-
-		var item = BookItem.Create(id, barcode, acquired, this);
-		_bookItems.Add(item);
-
-		return item.Id;
 	}
 
 	private static void GuardTitle(string title)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(title);
-
 		if (title.Length > MaxTitleLength)
 		{
-			throw new ArgumentException($"Title exceeds maximum length of {MaxTitleLength} characters.");
+			throw new ArgumentException($"Title exceeds maximum length of {MaxTitleLength} characters.", nameof(title));
 		}
 	}
 
 	private static void GuardIsbn(string? isbn)
 	{
-		if (isbn is not null && isbn.Trim().Length > MaxIsbnLength)
+		if (isbn is not null && isbn.Length > MaxIsbnLength)
 		{
-			throw new ArgumentException($"ISBN exceeds maximum length of {MaxIsbnLength} characters.");
+			throw new ArgumentException($"ISBN exceeds maximum length of {MaxIsbnLength} characters.", nameof(isbn));
 		}
 	}
 
