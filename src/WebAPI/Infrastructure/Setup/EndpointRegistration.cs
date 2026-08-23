@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using WebAPI.Features.Authors;
 using WebAPI.Features.Books;
+using WebAPI.Features.Common;
 
 namespace WebAPI.Infrastructure.Setup;
 
@@ -10,7 +12,9 @@ public static class EndpointRegistration
 	{
 		app.UseHealthChecks("/_health");
 
-		var group = app.MapGroup("/api");
+		var group = app.MapGroup("/api")
+			.AddEndpointFilter<ProblemLoggingFilter>();
+
 		group.MapAuthorsEndpoints();
 		group.MapBooksEndpoints();
 		return app;
