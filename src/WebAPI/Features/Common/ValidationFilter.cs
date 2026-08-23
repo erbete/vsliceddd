@@ -23,12 +23,16 @@ internal sealed class ValidationFilter<T> : IEndpointFilter where T : class
         var result = await validator.ValidateAsync(argument, context.HttpContext.RequestAborted);
         if (!result.IsValid)
         {
-            return TypedResults.Problem(new HttpValidationProblemDetails(result.ToDictionary())
+            var problem = new HttpValidationProblemDetails(result.ToDictionary())
             {
                 Status = StatusCodes.Status400BadRequest,
                 Title = "One or more validation errors occurred.",
                 Detail = "One or more fields in the request body are invalid."
-            });
+            };
+
+            Problems.Stamp(problem, "Request.ValidationFailed", context.HttpContext);
+
+            return TypedResults.Problem(problem);
         }
 
         return await next(context);

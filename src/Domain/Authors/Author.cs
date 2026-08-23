@@ -13,24 +13,30 @@ public sealed class Author : AggregateRoot
 
     private Author(Guid id, string name, string? country)
     {
+        name = name?.Trim()!;
+        country = country?.Trim();
+
         GuardId(id);
         GuardName(name);
         GuardCountry(country);
 
         Id = id;
-        Name = name.Trim();
-        Country = country?.Trim();
+        Name = name;
+        Country = country;
     }
 
     public static Author Create(Guid id, string name, string? country) => new(id, name, country);
 
     public void UpdateDetails(string name, string? country)
     {
+        name = name?.Trim()!;
+        country = country?.Trim();
+
         GuardName(name);
         GuardCountry(country);
 
-        Name = name.Trim();
-        Country = country?.Trim();
+        Name = name;
+        Country = country;
     }
 
     private static void GuardId(Guid id)

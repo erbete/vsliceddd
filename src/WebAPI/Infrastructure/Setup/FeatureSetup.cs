@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using WebAPI.Features.Authors;
 using WebAPI.Features.Books;
 
 namespace WebAPI.Infrastructure.Setup;
@@ -11,6 +12,7 @@ public static class FeatureSetup
     {
         builder.Services.AddHealthChecks();
         builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
+        builder.Services.AddAuthorsFeature();
         builder.Services.AddBooksFeature();
         return builder;
     }
