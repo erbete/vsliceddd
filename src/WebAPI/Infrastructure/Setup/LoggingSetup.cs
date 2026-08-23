@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
+using Serilog.Enrichers.Span;
+
 namespace WebAPI.Infrastructure.Setup;
 
 public static class LoggingSetup
@@ -33,9 +35,10 @@ public static class LoggingSetup
                 .MinimumLevel.Override("Microsoft.AspNetCore", Map(aspNetLevel))
                 .MinimumLevel.Override("System", Map(systemLevel))
                 .Enrich.FromLogContext()
+                .Enrich.WithSpan()
                 .Enrich.WithProperty("Application", "VSliceDDD")
                 .WriteTo.Console(
-                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {TraceId} {Message:lj}{NewLine}{Exception}",
                     formatProvider: CultureInfo.InvariantCulture);
 
             if (builder.Environment.IsDevelopment())
@@ -55,9 +58,9 @@ public static class LoggingSetup
     {
         app.UseSerilogRequestLogging(options =>
         {
-            options.EnrichDiagnosticContext = (diag, http) => diag.Set("TraceId", http.TraceIdentifier);
-            options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} {TraceId} {Elapsed:0.000}ms";
+            options.GetLevel = (_, _, _) => LogEventLevel.Information;
         });
+
         return app;
     }
 

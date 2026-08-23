@@ -18,8 +18,8 @@ try
 
     var app = builder.Build();
 
-    app.UseExceptionHandling()
-       .UseLogging()
+    app.UseLogging()
+       .UseExceptionHandling()
        .UseOpenApiDocs()
        .UseEndpoints();
 

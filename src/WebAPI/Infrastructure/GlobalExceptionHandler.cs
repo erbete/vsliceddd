@@ -37,18 +37,17 @@ internal sealed class GlobalExceptionHandler(
 			}
 		};
 
-#pragma warning disable CA1848
-		if (problemDetails.Status >= StatusCodes.Status500InternalServerError)
+		int status = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
+		if (status >= StatusCodes.Status500InternalServerError)
 		{
-			logger.LogError(exception, "Unexpected exception");
+			HandlerLog.UnexpectedException(logger, exception);
 		}
 		else
 		{
-			logger.LogWarning(exception, "Request failed with {StatusCode}", problemDetails.Status);
+			HandlerLog.RequestFailed(logger, status, exception);
 		}
-#pragma warning restore CA1848
 
-		httpContext.Response.StatusCode = problemDetails.Status!.Value;
+		httpContext.Response.StatusCode = status;
 
 		return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
 		{
@@ -77,4 +76,13 @@ internal sealed class GlobalExceptionHandler(
 
 		return problem;
 	}
+}
+
+internal static partial class HandlerLog
+{
+	[LoggerMessage(EventId = 5000, Level = LogLevel.Error, Message = "Unexpected exception")]
+	public static partial void UnexpectedException(Microsoft.Extensions.Logging.ILogger logger, Exception ex);
+
+	[LoggerMessage(EventId = 4000, Level = LogLevel.Warning, Message = "Request failed with {StatusCode}")]
+	public static partial void RequestFailed(Microsoft.Extensions.Logging.ILogger logger, int statusCode, Exception ex);
 }
