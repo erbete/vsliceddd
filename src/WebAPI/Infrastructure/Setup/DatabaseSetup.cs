@@ -2,6 +2,7 @@ using System;
 using Database;
 using Database.Configurations;
 using Database.Interceptors;
+using EntityFramework.Exceptions.PostgreSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -37,6 +38,7 @@ public static class DatabaseSetup
 			var settings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
 			options
 				.UseNpgsql(settings.DefaultConnection)
+				.UseExceptionProcessor()
 				.AddInterceptors(
 					sp.GetRequiredService<EntityAuditInterceptor>(),
 					sp.GetRequiredService<DomainEventDispatchInterceptor>());
