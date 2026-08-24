@@ -41,7 +41,8 @@ WebAPI/            # ASP.NET Core backend (API endpoints + feature slices)
   Program.cs       # Application entry point (composes Setup extensions)
 Client/            # ASP.NET Core SSR UI host — skeleton ("Hello World"); Yarp.ReverseProxy referenced in Debug
   Program.cs       # Client entry point
-tests/             # Tests (coming soon)
+tests/
+  Domain.UnitTests/ # Domain unit tests (xUnit + Shouldly)
 ```
 
 ## Build & Run
@@ -67,6 +68,9 @@ dotnet ef migrations add <Name> --project src/Database --startup-project src/Web
 
 # Apply migrations
 dotnet ef database update --project src/Database --startup-project src/WebAPI
+
+# Run tests
+dotnet test
 ```
 
 - Scalar API reference: `http://localhost:5243/scalar` (Development only)

@@ -1,4 +1,6 @@
 VSliceDDD.sln.DotSettings.user
 src/*/bin
 src/*/obj
+tests/*/bin
+tests/*/obj
 src/Database/Migrations
