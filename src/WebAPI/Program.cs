@@ -1,6 +1,6 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using WebAPI.Infrastructure.Setup;
-using System;
 
 LoggingSetup.InitializeBootstrap();
 
@@ -14,14 +14,17 @@ try
         .AddExceptionHandling()
         .AddOpenApiDocs()
         .AddTelemetry()
-        .AddFeatures();
+        .AddFeatures()
+        .AddSeeding();
 
     var app = builder.Build();
 
+    await app.UseSeedingAsync();
+
     app.UseLogging()
-       .UseExceptionHandling()
-       .UseOpenApiDocs()
-       .UseEndpoints();
+        .UseExceptionHandling()
+        .UseOpenApiDocs()
+        .UseEndpoints();
 
     await app.RunAsync();
 }
