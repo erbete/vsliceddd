@@ -12,6 +12,7 @@ internal static class Endpoints
     {
         services.AddScoped<GetBookById.Handler>();
         services.AddScoped<CreateBook.Handler>();
+        services.AddScoped<AddBookCopy.Handler>();
         return services;
     }
 
@@ -28,6 +29,12 @@ internal static class Endpoints
         group.MapPost("/", CreateBook.Endpoint)
             .WithName(nameof(CreateBook))
             .AddEndpointFilter<ValidationFilter<CreateBook.Request>>()
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict);
+
+        group.MapPost("/{id}/copies", AddBookCopy.Endpoint)
+            .AddEndpointFilter<ValidationFilter<AddBookCopy.Request>>()
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict);

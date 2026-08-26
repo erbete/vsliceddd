@@ -1,3 +1,4 @@
+using System;
 using Domain.Books;
 using Domain.Common;
 using ErrorOr;
@@ -10,13 +11,15 @@ public sealed class LendableCopy : AggregateRoot<LendableCopyId>
     public LoanId? CurrentLoanId { get; private set; }
     public bool IsAvailable => CurrentLoanId is null;
 
-    private LendableCopy(BookId bookId)
+    private LendableCopy(LendableCopyId id, BookId bookId)
     {
-        Id = LendableCopyId.New();
+        Id = id;
         BookId = bookId;
     }
 
-    public static LendableCopy Create(BookId bookId) => new(bookId);
+    // lendableCopyId is the BookItem id
+    public static LendableCopy Create(Guid lendableCopyId, BookId bookId) =>
+        new(LendableCopyId.From(lendableCopyId), bookId);
 
     public ErrorOr<Success> CheckOut(LoanId loanId)
     {

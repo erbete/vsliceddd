@@ -4,6 +4,7 @@ using WebAPI.Features.Authors;
 using WebAPI.Features.Books;
 using WebAPI.Features.Common;
 using WebAPI.Features.Lending;
+using WebAPI.Features.Members;
 
 namespace WebAPI.Infrastructure.Setup;
 
@@ -19,6 +20,7 @@ public static class EndpointRegistration
 		group.MapAuthorsEndpoints();
 		group.MapBooksEndpoints();
 		group.MapLendingEndpoints();
+		group.MapMembersEndpoints();
 		return app;
 	}
 }

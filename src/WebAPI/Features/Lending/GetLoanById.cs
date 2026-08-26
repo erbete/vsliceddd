@@ -7,6 +7,7 @@ using Domain.Lending;
 using ErrorOr;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.Features.Common;
 
@@ -46,7 +47,7 @@ internal static class GetLoanById
 
     internal static async Task<Results<Ok<Response>, ProblemHttpResult>> Endpoint(
         LoanId id,
-        Handler handler,
+        [FromServices] Handler handler,
         CancellationToken ct)
     {
         var result = await handler.HandleAsync(id, ct);

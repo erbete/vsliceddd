@@ -21,7 +21,7 @@ internal sealed class LoanConfiguration : AggregateRootConfiguration<Loan, LoanI
 			.HasColumnName("return_date");
 
 		builder.Property(l => l.LendableCopyId)
-			.HasColumnName("copy_id");
+			.HasColumnName("lendable_copy_id");
 
 		builder.Property(l => l.MemberId)
 			.HasColumnName("member_id");
@@ -39,6 +39,6 @@ internal sealed class LoanConfiguration : AggregateRootConfiguration<Loan, LoanI
 		builder.HasIndex(l => l.LendableCopyId)
 			.IsUnique()
 			.HasFilter("return_date IS NULL")
-			.HasDatabaseName("ix_loans_copy_id_active");
+			.HasDatabaseName("ix_loans_lendable_copy_id_active");
 	}
 }

@@ -16,14 +16,14 @@ public sealed class Loan : AggregateRoot<LoanId>
     public LendableCopyId LendableCopyId { get; private set; }
     public MemberId MemberId { get; private set; }
 
-    private Loan(DateOnly loanDate, LendableCopyId copyId, MemberId memberId)
+    private Loan(DateOnly loanDate, LendableCopyId lendableCopyId, MemberId memberId)
     {
         GuardLoanDate(loanDate);
 
         Id = LoanId.New();
         LoanDate = loanDate;
         DueDate = loanDate.AddDays(LoanPeriodDays);
-        LendableCopyId = copyId;
+        LendableCopyId = lendableCopyId;
         MemberId = memberId;
     }
 
