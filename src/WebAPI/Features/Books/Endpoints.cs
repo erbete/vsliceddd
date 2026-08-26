@@ -21,7 +21,7 @@ internal static class Endpoints
             .WithTags("Books")
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("/{id:guid}", GetBookById.Endpoint)
+        group.MapGet("/{id}", GetBookById.Endpoint)
             .WithName(nameof(GetBookById))
             .ProducesProblem(StatusCodes.Status404NotFound);
 

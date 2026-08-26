@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Database;
 using Domain.Authors;
-using Domain.Common;
 using ErrorOr;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -17,28 +16,28 @@ internal static class CreateAuthor
     internal sealed record Request(string Name, string? Country);
     internal sealed record Response(Guid Id, string Name, string? Country);
 
-    internal sealed class CreateAuthorValidator : AbstractValidator<Request>
+    internal sealed class Validator : AbstractValidator<Request>
     {
-        public CreateAuthorValidator()
+        public Validator()
         {
-            RuleFor(a => a.Name)
+            RuleFor(r => r.Name)
                 .NotEmpty()
                 .MaximumLength(Author.MaxNameLength);
 
-            RuleFor(a => a.Country)
+            RuleFor(r => r.Country)
                 .MaximumLength(Author.MaxCountryLength);
         }
     }
 
-    internal sealed class Handler(AppDbContext db, IIdGenerator idGenerator)
+    internal sealed class Handler(AppDbContext db)
     {
         public async Task<ErrorOr<Response>> HandleAsync(Request request, CancellationToken ct)
         {
-            var author = Author.Create(idGenerator.NewId(), request.Name, request.Country);
+            var author = Author.Create(request.Name, request.Country);
             db.Authors.Add(author);
-
             await db.SaveChangesAsync(ct);
-            return new Response(author.Id, author.Name, author.Country);
+
+            return new Response(author.Id.Value, author.Name, author.Country);
         }
     }
 

@@ -10,16 +10,12 @@ try
 
     builder.AddLogging()
         .AddDatabase()
-        .AddDomainServices()
         .AddExceptionHandling()
         .AddOpenApiDocs()
         .AddTelemetry()
-        .AddFeatures()
-        .AddSeeding();
+        .AddFeatures();
 
     var app = builder.Build();
-
-    await app.UseSeedingAsync();
 
     app.UseLogging()
         .UseExceptionHandling()

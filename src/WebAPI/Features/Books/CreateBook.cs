@@ -2,8 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Database;
+using Domain.Authors;
 using Domain.Books;
-using Domain.Common;
 using EntityFramework.Exceptions.Common;
 using ErrorOr;
 using FluentValidation;
@@ -19,37 +19,39 @@ internal static class CreateBook
     internal sealed record Request(string Title, int PublishedYear, Guid AuthorId, string? Isbn);
     internal sealed record Response(Guid Id, string Title, int PublishedYear, string? Isbn);
 
-    internal sealed class CreateBookValidator : AbstractValidator<Request>
+    internal sealed class Validator : AbstractValidator<Request>
     {
-        public CreateBookValidator()
+        public Validator()
         {
-            RuleFor(b => b.Title)
+            RuleFor(r => r.Title)
                 .NotEmpty()
                 .MaximumLength(Book.MaxTitleLength);
 
-            RuleFor(b => b.PublishedYear)
-                .LessThan(DateTimeOffset.UtcNow.AddYears(1).Year)
+            RuleFor(r => r.PublishedYear)
+                .LessThanOrEqualTo(DateTime.UtcNow.Year)
                 .GreaterThanOrEqualTo(Book.MinPublishedYear);
 
-            RuleFor(b => b.AuthorId).NotEmpty();
+            RuleFor(r => r.AuthorId)
+                .NotEmpty();
 
-            RuleFor(b => b.Isbn)
-                .MaximumLength(Book.MaxIsbnLength)
-                .When(b => b.Isbn is not null);
+            RuleFor(r => r.Isbn)
+                .MaximumLength(Book.MaxIsbnLength);
         }
     }
 
-    internal sealed class Handler(AppDbContext db, IIdGenerator idGenerator)
+    internal sealed class Handler(AppDbContext db)
     {
         public async Task<ErrorOr<Response>> HandleAsync(Request request, CancellationToken ct)
         {
-            bool authorExists = await db.Authors.AnyAsync(a => a.Id == request.AuthorId, ct);
+            var authorId = AuthorId.From(request.AuthorId);
+
+            bool authorExists = await db.Authors.AnyAsync(a => a.Id == authorId, ct);
             if (!authorExists)
             {
-                return BookErrors.AuthorNotFound(request.AuthorId);
+                return BookErrors.AuthorNotFound(authorId);
             }
 
-            var book = Book.Create(idGenerator.NewId(), request.Title, request.PublishedYear, request.AuthorId, request.Isbn);
+            var book = Book.Create(request.Title, request.PublishedYear, authorId, request.Isbn);
             db.Books.Add(book);
 
             try
@@ -61,7 +63,7 @@ internal static class CreateBook
                 return BookErrors.DuplicateIsbn(request.Title, request.Isbn);
             }
 
-            return new Response(book.Id, book.Title, book.PublishedYear, book.Isbn);
+            return new Response(book.Id.Value, book.Title, book.PublishedYear, book.Isbn);
         }
     }
 

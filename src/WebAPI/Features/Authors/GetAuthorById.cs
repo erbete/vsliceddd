@@ -14,22 +14,21 @@ namespace WebAPI.Features.Authors;
 
 internal static class GetAuthorById
 {
-    internal sealed record Request(Guid Id);
     internal sealed record Response(Guid Id, string Name, string? Country);
 
     internal sealed class Handler(AppDbContext db)
     {
-        public async Task<ErrorOr<Response>> HandleAsync(Request Request, CancellationToken ct)
+        public async Task<ErrorOr<Response>> HandleAsync(AuthorId id, CancellationToken ct)
         {
             var author = await db.Authors
                 .AsNoTracking()
-                .Where(a => a.Id == Request.Id)
-                .Select(a => new Response(a.Id, a.Name, a.Country))
+                .Where(a => a.Id == id)
+                .Select(a => new Response(a.Id.Value, a.Name, a.Country))
                 .FirstOrDefaultAsync(ct);
 
             if (author is null)
             {
-                return AuthorErrors.NotFound(Request.Id);
+                return AuthorErrors.NotFound(id);
             }
 
             return author;
@@ -37,11 +36,11 @@ internal static class GetAuthorById
     }
 
     internal static async Task<Results<Ok<Response>, ProblemHttpResult>> Endpoint(
-        Guid id,
+        AuthorId id,
         Handler handler,
         CancellationToken ct)
     {
-        var result = await handler.HandleAsync(new Request(id), ct);
+        var result = await handler.HandleAsync(id, ct);
 
         return result.IsError
             ? Problems.From(result.FirstError)

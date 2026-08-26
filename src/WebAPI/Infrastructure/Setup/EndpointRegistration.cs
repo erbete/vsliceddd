@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using WebAPI.Features.Authors;
 using WebAPI.Features.Books;
 using WebAPI.Features.Common;
+using WebAPI.Features.Lending;
 
 namespace WebAPI.Infrastructure.Setup;
 
@@ -17,6 +18,7 @@ public static class EndpointRegistration
 
 		group.MapAuthorsEndpoints();
 		group.MapBooksEndpoints();
+		group.MapLendingEndpoints();
 		return app;
 	}
 }

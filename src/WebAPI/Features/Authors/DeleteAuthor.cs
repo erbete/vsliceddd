@@ -1,8 +1,8 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Database;
+using Domain.Authors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +13,16 @@ internal static class DeleteAuthor
 {
     internal sealed class Handler(AppDbContext db)
     {
-        public async Task HandleAsync(Guid id, CancellationToken ct)
+        public async Task HandleAsync(AuthorId id, CancellationToken ct)
         {
             await db.Authors
-                .Where(a => a.Id == id)
+                .Where(r => r.Id == id)
                 .ExecuteDeleteAsync(ct);
         }
     }
 
     internal static async Task<NoContent> Endpoint(
-        Guid id,
+        AuthorId id,
         Handler handler,
         CancellationToken ct)
     {

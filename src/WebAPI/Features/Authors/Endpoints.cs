@@ -22,7 +22,7 @@ internal static class Endpoints
             .WithTags("Authors")
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("/{id:guid}", GetAuthorById.Endpoint)
+        group.MapGet("/{id}", GetAuthorById.Endpoint)
             .WithName(nameof(GetAuthorById))
             .ProducesProblem(StatusCodes.Status404NotFound);
 
@@ -31,7 +31,7 @@ internal static class Endpoints
             .AddEndpointFilter<ValidationFilter<CreateAuthor.Request>>()
             .ProducesValidationProblem();
 
-        group.MapDelete("/{id:guid}", DeleteAuthor.Endpoint)
+        group.MapDelete("/{id}", DeleteAuthor.Endpoint)
             .WithName(nameof(DeleteAuthor));
     }
 }

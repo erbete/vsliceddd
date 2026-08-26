@@ -14,22 +14,21 @@ namespace WebAPI.Features.Books;
 
 internal static class GetBookById
 {
-    internal sealed record Request(Guid Id);
     internal sealed record Response(Guid Id, string Title, int PublishedYear, string? Isbn);
 
     internal sealed class Handler(AppDbContext db)
     {
-        public async Task<ErrorOr<Response>> HandleAsync(Request Request, CancellationToken ct)
+        public async Task<ErrorOr<Response>> HandleAsync(BookId id, CancellationToken ct)
         {
             var book = await db.Books
                 .AsNoTracking()
-                .Where(b => b.Id == Request.Id)
-                .Select(b => new Response(b.Id, b.Title, b.PublishedYear, b.Isbn))
+                .Where(b => b.Id == id)
+                .Select(b => new Response(b.Id.Value, b.Title, b.PublishedYear, b.Isbn))
                 .FirstOrDefaultAsync(ct);
 
             if (book is null)
             {
-                return BookErrors.NotFound(Request.Id);
+                return BookErrors.NotFound(id);
             }
 
             return book;
@@ -37,11 +36,11 @@ internal static class GetBookById
     }
 
     internal static async Task<Results<Ok<Response>, ProblemHttpResult>> Endpoint(
-        Guid id,
+        BookId id,
         Handler handler,
         CancellationToken ct)
     {
-        var result = await handler.HandleAsync(new Request(id), ct);
+        var result = await handler.HandleAsync(id, ct);
 
         return result.IsError
             ? Problems.From(result.FirstError)
