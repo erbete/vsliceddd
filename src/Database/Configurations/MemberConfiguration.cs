@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Database.Configurations;
 
-internal sealed class MemberConfiguration : AggregateRootConfiguration<Member>
+internal sealed class MemberConfiguration : AggregateRootConfiguration<Member, MemberId>
 {
 	protected override void ConfigureEntity(EntityTypeBuilder<Member> builder)
 	{

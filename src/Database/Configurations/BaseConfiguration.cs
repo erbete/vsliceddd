@@ -1,10 +1,13 @@
+using System;
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Database.Configurations;
 
-internal abstract class BaseConfiguration<T> : IEntityTypeConfiguration<T> where T : Entity
+internal abstract class BaseConfiguration<T, TId> : IEntityTypeConfiguration<T>
+	where T : Entity<TId>
+	where TId : struct, IEquatable<TId>
 {
 	public virtual void Configure(EntityTypeBuilder<T> builder)
 	{

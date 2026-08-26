@@ -3,7 +3,7 @@ using Domain.Common;
 
 namespace Domain.Authors;
 
-public sealed class Author : AggregateRoot
+public sealed class Author : AggregateRoot<AuthorId>
 {
     public const int MaxNameLength = 255;
     public const int MaxCountryLength = 255;
@@ -11,21 +11,20 @@ public sealed class Author : AggregateRoot
     public string Name { get; private set; }
     public string? Country { get; private set; }
 
-    private Author(Guid id, string name, string? country)
+    private Author(string name, string? country)
     {
         name = name?.Trim()!;
         country = country?.Trim();
 
-        GuardId(id);
         GuardName(name);
         GuardCountry(country);
 
-        Id = id;
+        Id = AuthorId.New();
         Name = name;
         Country = country;
     }
 
-    public static Author Create(Guid id, string name, string? country) => new(id, name, country);
+    public static Author Create(string name, string? country) => new(name, country);
 
     public void UpdateDetails(string name, string? country)
     {
@@ -37,14 +36,6 @@ public sealed class Author : AggregateRoot
 
         Name = name;
         Country = country;
-    }
-
-    private static void GuardId(Guid id)
-    {
-        if (id == Guid.Empty)
-        {
-            throw new ArgumentException("Id cannot be empty.", nameof(id));
-        }
     }
 
     private static void GuardName(string name)

@@ -29,18 +29,18 @@ public sealed class EntityAuditInterceptor(TimeProvider timeProvider) : SaveChan
 		if (context == null) return;
 
 		var now = timeProvider.GetUtcNow();
-		var entries = context.ChangeTracker.Entries<Entity>();
+		var entries = context.ChangeTracker.Entries<IAuditable>();
 
 		foreach (var entry in entries)
 			switch (entry.State)
 			{
 				case EntityState.Added:
-					entry.Property(nameof(Entity.CreatedAt)).CurrentValue = now;
-					entry.Property(nameof(Entity.UpdatedAt)).CurrentValue = now;
+					entry.Property(nameof(IAuditable.CreatedAt)).CurrentValue = now;
+					entry.Property(nameof(IAuditable.UpdatedAt)).CurrentValue = now;
 					break;
 
 				case EntityState.Modified:
-					entry.Property(nameof(Entity.UpdatedAt)).CurrentValue = now;
+					entry.Property(nameof(IAuditable.UpdatedAt)).CurrentValue = now;
 					break;
 
 				case EntityState.Detached:

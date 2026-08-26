@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Database.Configurations;
 
-internal sealed class BookItemConfiguration : BaseConfiguration<BookItem>
+internal sealed class BookItemConfiguration : BaseConfiguration<BookItem, BookItemId>
 {
 	protected override void ConfigureEntity(EntityTypeBuilder<BookItem> builder)
 	{

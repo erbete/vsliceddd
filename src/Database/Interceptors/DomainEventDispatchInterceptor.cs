@@ -32,7 +32,7 @@ public sealed class DomainEventDispatchInterceptor(TimeProvider timeProvider) : 
         if (context is null) return Task.CompletedTask;
 
         var aggregates = context.ChangeTracker
-            .Entries<AggregateRoot>()
+            .Entries<IAggregateRoot>()
             .Select(e => e.Entity)
             .Where(a => a.DomainEvents.Count > 0)
             .ToList();

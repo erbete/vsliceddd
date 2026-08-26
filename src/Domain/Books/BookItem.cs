@@ -4,35 +4,33 @@ using Domain.Common;
 
 namespace Domain.Books;
 
-public sealed class BookItem : Entity
+public sealed class BookItem : Entity<BookItemId>
 {
     public const int MaxBarcodeLength = 80;
 
     public string Barcode { get; private set; }
     public DateOnly Acquired { get; private set; }
-    public Guid BookId { get; private set; }
+
+    public BookId BookId { get; private set; }
     public Book Book { get; private set; } = null!;
 
-    private BookItem(Guid id, string barcode, DateOnly acquired, Guid bookId)
+    private BookItem(string barcode, DateOnly acquired, BookId bookId)
     {
         barcode = Normalize(barcode);
 
-        GuardId(id);
         GuardBarcode(barcode);
         GuardAcquired(acquired);
-        GuardBookId(bookId);
 
-        Id = id;
+        Id = BookItemId.New();
         Barcode = barcode;
         Acquired = acquired;
         BookId = bookId;
     }
 
     internal static BookItem Create(
-        Guid id,
         string barcode,
         DateOnly acquired,
-        Book book) => new(id, barcode, acquired, book.Id);
+        BookId bookId) => new(barcode, acquired, bookId);
 
     internal void UpdateBarcode(string barcode)
     {
@@ -41,16 +39,8 @@ public sealed class BookItem : Entity
         Barcode = barcode;
     }
 
-    internal static string Normalize(string barcode)
-        => barcode?.Trim().ToLower(CultureInfo.InvariantCulture)!;
-
-    private static void GuardId(Guid id)
-    {
-        if (id == Guid.Empty)
-        {
-            throw new ArgumentException("Id cannot be empty.", nameof(id));
-        }
-    }
+    internal static string Normalize(string barcode) =>
+        barcode?.Trim().ToLower(CultureInfo.InvariantCulture)!;
 
     private static void GuardBarcode(string barcode)
     {
@@ -61,14 +51,6 @@ public sealed class BookItem : Entity
         }
     }
 
-    private static void GuardAcquired(DateOnly acquired)
-        => ArgumentOutOfRangeException.ThrowIfGreaterThan(acquired, DateOnly.FromDateTime(DateTime.UtcNow));
-
-    private static void GuardBookId(Guid bookId)
-    {
-        if (bookId == Guid.Empty)
-        {
-            throw new ArgumentException("BookId cannot be empty.", nameof(bookId));
-        }
-    }
+    private static void GuardAcquired(DateOnly acquired) =>
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(acquired, DateOnly.FromDateTime(DateTime.UtcNow));
 }

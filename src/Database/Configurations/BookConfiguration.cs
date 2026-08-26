@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Database.Configurations;
 
-internal sealed class BookConfiguration : AggregateRootConfiguration<Book>
+internal sealed class BookConfiguration : AggregateRootConfiguration<Book, BookId>
 {
 	protected override void ConfigureEntity(EntityTypeBuilder<Book> builder)
 	{

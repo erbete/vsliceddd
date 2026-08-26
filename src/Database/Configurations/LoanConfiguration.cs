@@ -1,12 +1,11 @@
-using Domain.Books;
-using Domain.Loans;
+using Domain.Lending;
 using Domain.Members;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Database.Configurations;
 
-internal sealed class LoanConfiguration : AggregateRootConfiguration<Loan>
+internal sealed class LoanConfiguration : AggregateRootConfiguration<Loan, LoanId>
 {
 	protected override void ConfigureEntity(EntityTypeBuilder<Loan> builder)
 	{
@@ -21,15 +20,15 @@ internal sealed class LoanConfiguration : AggregateRootConfiguration<Loan>
 		builder.Property(l => l.ReturnDate)
 			.HasColumnName("return_date");
 
-		builder.Property(l => l.BookItemId)
-			.HasColumnName("book_item_id");
+		builder.Property(l => l.LendableCopyId)
+			.HasColumnName("copy_id");
 
 		builder.Property(l => l.MemberId)
 			.HasColumnName("member_id");
 
-		builder.HasOne<BookItem>()
+		builder.HasOne<LendableCopy>()
 			.WithMany()
-			.HasForeignKey(l => l.BookItemId)
+			.HasForeignKey(l => l.LendableCopyId)
 			.OnDelete(DeleteBehavior.Restrict);
 
 		builder.HasOne<Member>()
@@ -37,8 +36,9 @@ internal sealed class LoanConfiguration : AggregateRootConfiguration<Loan>
 			.HasForeignKey(l => l.MemberId)
 			.OnDelete(DeleteBehavior.Restrict);
 
-		builder.HasIndex(l => l.BookItemId)
+		builder.HasIndex(l => l.LendableCopyId)
 			.IsUnique()
-			.HasFilter("return_date IS NULL");
+			.HasFilter("return_date IS NULL")
+			.HasDatabaseName("ix_loans_copy_id_active");
 	}
 }
