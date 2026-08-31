@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using Domain.Common;
 
 namespace Domain.Books;
@@ -10,9 +9,7 @@ public sealed class BookItem : Entity<BookItemId>
 
     public string Barcode { get; private set; }
     public DateOnly Acquired { get; private set; }
-
     public BookId BookId { get; private set; }
-    public Book Book { get; private set; } = null!;
 
     private BookItem(string barcode, DateOnly acquired, BookId bookId)
     {
@@ -39,12 +36,14 @@ public sealed class BookItem : Entity<BookItemId>
         Barcode = barcode;
     }
 
-    internal static string Normalize(string barcode) =>
-        barcode?.Trim().ToLower(CultureInfo.InvariantCulture)!;
+    internal static string Normalize(string barcode)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(barcode);
+        return barcode.Trim().ToLowerInvariant();
+    }
 
     private static void GuardBarcode(string barcode)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(barcode);
         if (barcode.Length > MaxBarcodeLength)
         {
             throw new ArgumentException($"Barcode exceeds maximum length of {MaxBarcodeLength} characters.", nameof(barcode));

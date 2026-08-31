@@ -13,6 +13,8 @@ public sealed class LendableCopy : AggregateRoot<LendableCopyId>
 
     private LendableCopy(LendableCopyId id, BookId bookId)
     {
+        ArgumentOutOfRangeException.ThrowIfEqual(bookId, default);
+
         Id = id;
         BookId = bookId;
     }

@@ -14,7 +14,7 @@ public sealed class Author : AggregateRoot<AuthorId>
     private Author(string name, string? country)
     {
         name = name?.Trim()!;
-        country = country?.Trim();
+        country = string.IsNullOrWhiteSpace(country) ? null : country.Trim();
 
         GuardName(name);
         GuardCountry(country);
@@ -29,7 +29,7 @@ public sealed class Author : AggregateRoot<AuthorId>
     public void UpdateDetails(string name, string? country)
     {
         name = name?.Trim()!;
-        country = country?.Trim();
+        country = string.IsNullOrWhiteSpace(country) ? null : country.Trim();
 
         GuardName(name);
         GuardCountry(country);
@@ -44,7 +44,7 @@ public sealed class Author : AggregateRoot<AuthorId>
 
         if (name.Length > MaxNameLength)
         {
-            throw new ArgumentException($"Name exceeds maximum length of {MaxNameLength} characters.");
+            throw new ArgumentException($"Name exceeds maximum length of {MaxNameLength} characters.", nameof(name));
         }
     }
 
@@ -52,7 +52,7 @@ public sealed class Author : AggregateRoot<AuthorId>
     {
         if (country is not null && country.Length > MaxCountryLength)
         {
-            throw new ArgumentException($"Country exceeds maximum length of {MaxCountryLength} characters.");
+            throw new ArgumentException($"Country exceeds maximum length of {MaxCountryLength} characters.", nameof(country));
         }
     }
 }

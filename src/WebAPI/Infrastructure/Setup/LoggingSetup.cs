@@ -65,7 +65,14 @@ public static class LoggingSetup
     }
 
     public static void LogStartupFailure(System.Exception ex)
-        => Log.Fatal(ex, "Application terminated unexpectedly");
+    {
+        if (ex is HostAbortedException)
+        {
+            return;
+        }
+
+        Log.Fatal(ex, "Application terminated unexpectedly");
+    }
 
     public static async Task CloseAndFlushAsync()
         => await Log.CloseAndFlushAsync();

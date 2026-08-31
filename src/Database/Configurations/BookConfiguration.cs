@@ -9,10 +9,24 @@ internal sealed class BookConfiguration : AggregateRootConfiguration<Book, BookI
 {
 	protected override void ConfigureEntity(EntityTypeBuilder<Book> builder)
 	{
-		builder.ToTable("books");
+		builder.ToTable("books", t =>
+		{
+			t.HasCheckConstraint(
+				"ck_books_published_year",
+				$"published_year >= {Book.MinPublishedYear}");
+
+			t.HasCheckConstraint(
+				"ck_books_title_not_blank",
+				"length(btrim(title)) > 0");
+
+			t.HasCheckConstraint(
+				"ck_books_isbn_not_blank",
+				"isbn IS NULL OR length(btrim(isbn)) > 0");
+		});
 
 		builder.Property(p => p.Title)
 			.HasColumnName("title")
+			.IsRequired()
 			.HasMaxLength(Book.MaxTitleLength);
 
 		builder.Property(b => b.Isbn)
@@ -30,8 +44,9 @@ internal sealed class BookConfiguration : AggregateRootConfiguration<Book, BookI
 			.IsUnique();
 
 		builder.HasMany(b => b.BookItems)
-			.WithOne(bi => bi.Book)
+			.WithOne()
 			.HasForeignKey(bi => bi.BookId)
+			.HasConstraintName("fk_book_items_book_id")
 			.OnDelete(DeleteBehavior.Cascade);
 
 		builder.Navigation(b => b.BookItems)
@@ -40,6 +55,7 @@ internal sealed class BookConfiguration : AggregateRootConfiguration<Book, BookI
 		builder.HasOne<Author>()
 			.WithMany()
 			.HasForeignKey(b => b.AuthorId)
+			.HasConstraintName("fk_books_author_id")
 			.OnDelete(DeleteBehavior.Restrict);
 	}
 }

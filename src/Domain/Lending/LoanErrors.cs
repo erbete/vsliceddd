@@ -13,4 +13,7 @@ public static class LoanErrors
 
     public static Error ReturnDateBeforeLoanDate(DateOnly returnDate, DateOnly loanDate) =>
         Error.Validation("Loan.ReturnDateBeforeLoanDate", $"Return date {returnDate:yyyy-MM-dd} is before the loan date {loanDate:yyyy-MM-dd}.");
+
+    public static Error ReturnDateInFuture(DateOnly returnDate) =>
+        Error.Validation("Loan.ReturnDateInFuture", $"Return date {returnDate:yyyy-MM-dd} is in the future.");
 }

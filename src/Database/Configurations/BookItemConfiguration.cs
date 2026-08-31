@@ -8,11 +8,20 @@ internal sealed class BookItemConfiguration : BaseConfiguration<BookItem, BookIt
 {
 	protected override void ConfigureEntity(EntityTypeBuilder<BookItem> builder)
 	{
-		builder.ToTable("book_items");
+		builder.ToTable("book_items", t =>
+		{
+			t.HasCheckConstraint(
+				"ck_book_items_barcode_not_blank",
+				"length(btrim(barcode)) > 0");
+		});
 
 		builder.Property(bi => bi.Barcode)
 			.HasColumnName("barcode")
-			.HasMaxLength(BookItem.MaxBarcodeLength);
+			.HasMaxLength(BookItem.MaxBarcodeLength)
+			.IsRequired();
+
+		builder.Property(bi => bi.Acquired)
+			.HasColumnName("acquired");
 
 		builder.Property(bi => bi.BookId)
 			.HasColumnName("book_id");

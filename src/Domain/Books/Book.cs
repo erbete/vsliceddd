@@ -24,7 +24,7 @@ public sealed class Book : AggregateRoot<BookId>
 	private Book(string title, int publishedYear, AuthorId authorId, string? isbn = null)
 	{
 		title = title?.Trim()!;
-		isbn = isbn?.Trim();
+		isbn = string.IsNullOrWhiteSpace(isbn) ? null : isbn.Trim();
 
 		GuardTitle(title);
 		GuardPublishedYear(publishedYear);
@@ -46,7 +46,7 @@ public sealed class Book : AggregateRoot<BookId>
 	public void UpdateDetails(string title, int publishedYear, string? isbn = null)
 	{
 		title = title?.Trim()!;
-		isbn = isbn?.Trim();
+		isbn = string.IsNullOrWhiteSpace(isbn) ? null : isbn.Trim();
 
 		GuardTitle(title);
 		GuardPublishedYear(publishedYear);
@@ -59,13 +59,14 @@ public sealed class Book : AggregateRoot<BookId>
 
 	public ErrorOr<BookItemId> AddCopy(string barcode, DateOnly acquired)
 	{
-		var item = BookItem.Create(barcode, acquired, Id);
+		string normalized = BookItem.Normalize(barcode);
 
-		if (_bookItems.Any(i => i.Barcode.Equals(item.Barcode, StringComparison.Ordinal)))
+		if (_bookItems.Any(i => i.Barcode.Equals(normalized, StringComparison.Ordinal)))
 		{
-			return BookErrors.DuplicateBarcode(item.Barcode);
+			return BookErrors.DuplicateBarcode(normalized);
 		}
 
+		var item = BookItem.Create(normalized, acquired, Id);
 		_bookItems.Add(item);
 		return item.Id;
 	}
@@ -85,7 +86,7 @@ public sealed class Book : AggregateRoot<BookId>
 			return BookErrors.DuplicateBarcode(normalized);
 		}
 
-		item.UpdateBarcode(barcode);
+		item.UpdateBarcode(normalized);
 		return Result.Success;
 	}
 
@@ -109,7 +110,7 @@ public sealed class Book : AggregateRoot<BookId>
 
 	private static void GuardPublishedYear(int publishedYear)
 	{
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(publishedYear, DateTime.UtcNow.Year);
 		ArgumentOutOfRangeException.ThrowIfLessThan(publishedYear, MinPublishedYear);
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(publishedYear, DateTime.UtcNow.Year);
 	}
 }

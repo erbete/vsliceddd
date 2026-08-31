@@ -44,6 +44,11 @@ public sealed class Loan : AggregateRoot<LoanId>
             return LoanErrors.ReturnDateBeforeLoanDate(returnDate, LoanDate);
         }
 
+        if (returnDate > DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            return LoanErrors.ReturnDateInFuture(returnDate);
+        }
+
         ReturnDate = returnDate;
         return Result.Success;
     }

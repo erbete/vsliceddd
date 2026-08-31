@@ -9,7 +9,16 @@ internal sealed class LoanConfiguration : AggregateRootConfiguration<Loan, LoanI
 {
 	protected override void ConfigureEntity(EntityTypeBuilder<Loan> builder)
 	{
-		builder.ToTable("loans");
+		builder.ToTable("loans", t =>
+		{
+			t.HasCheckConstraint(
+				"ck_loans_due_after_loan",
+				"due_date > loan_date");
+
+			t.HasCheckConstraint(
+				"ck_loans_return_after_loan",
+				"return_date IS NULL OR return_date >= loan_date");
+		});
 
 		builder.Property(l => l.LoanDate)
 			.HasColumnName("loan_date");
@@ -29,11 +38,13 @@ internal sealed class LoanConfiguration : AggregateRootConfiguration<Loan, LoanI
 		builder.HasOne<LendableCopy>()
 			.WithMany()
 			.HasForeignKey(l => l.LendableCopyId)
+			.HasConstraintName("fk_loans_lendable_copy_id")
 			.OnDelete(DeleteBehavior.Restrict);
 
 		builder.HasOne<Member>()
 			.WithMany()
 			.HasForeignKey(l => l.MemberId)
+			.HasConstraintName("fk_loans_member_id")
 			.OnDelete(DeleteBehavior.Restrict);
 
 		builder.HasIndex(l => l.LendableCopyId)

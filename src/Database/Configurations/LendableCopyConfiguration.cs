@@ -18,7 +18,14 @@ internal sealed class LendableCopyConfiguration : AggregateRootConfiguration<Len
 
         builder.Ignore(c => c.IsAvailable);
 
-        builder.HasIndex(c => new { c.BookId, c.CurrentLoanId })
-            .HasDatabaseName("ix_lendable_copies_book_id_current_loan_id");
+        builder.HasOne<Loan>()
+            .WithMany()
+            .HasForeignKey(c => c.CurrentLoanId)
+            .HasConstraintName("fk_lendable_copies_current_loan_id")
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(c => c.BookId)
+            .HasFilter("current_loan_id IS NULL")
+            .HasDatabaseName("ix_lendable_copies_available");
     }
 }
