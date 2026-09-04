@@ -21,7 +21,7 @@ internal static class PagedResultExtensions
     private const int MaxPageSize = 100;
 
     public static async Task<PagedResult<T>> ToPagedResultAsync<T>(
-        this IQueryable<T> query,
+        this IOrderedQueryable<T> query,
         ListRequest request,
         CancellationToken ct)
     {
