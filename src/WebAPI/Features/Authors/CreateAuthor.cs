@@ -7,7 +7,7 @@ using ErrorOr;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using WebAPI.Features.Common;
+using WebAPI.Infrastructure.Errors;
 
 namespace WebAPI.Features.Authors;
 

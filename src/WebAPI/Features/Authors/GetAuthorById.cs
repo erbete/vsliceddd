@@ -8,7 +8,7 @@ using ErrorOr;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using WebAPI.Features.Common;
+using WebAPI.Infrastructure.Errors;
 
 namespace WebAPI.Features.Authors;
 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using WebAPI.Infrastructure.Errors;
 
 namespace WebAPI.Features.Common;
 
@@ -12,8 +13,8 @@ internal sealed class ValidationFilter<T> : IEndpointFilter where T : class
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         var validator = context.HttpContext.RequestServices.GetRequiredService<IValidator<T>>();
-
         var argument = context.Arguments.OfType<T>().FirstOrDefault();
+
         if (argument is null)
         {
             throw new InvalidOperationException(
@@ -21,17 +22,15 @@ internal sealed class ValidationFilter<T> : IEndpointFilter where T : class
         }
 
         var result = await validator.ValidateAsync(argument, context.HttpContext.RequestAborted);
+
         if (!result.IsValid)
         {
             var problem = new HttpValidationProblemDetails(result.ToDictionary())
             {
-                Status = StatusCodes.Status400BadRequest,
-                Title = "One or more validation errors occurred.",
-                Detail = "One or more fields in the request body are invalid."
+                Status = StatusCodes.Status400BadRequest
             };
 
-            Problems.Stamp(problem, "Request.ValidationFailed", context.HttpContext);
-
+            Problems.Normalize(problem, context.HttpContext, ProblemCodes.ValidationFailed);
             return TypedResults.Problem(problem);
         }
 
